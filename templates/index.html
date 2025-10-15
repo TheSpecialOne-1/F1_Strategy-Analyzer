@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Strategy Analyzer - Professional Race Analysis</title>
+    <meta name="description" content="AI-powered Formula 1 race strategy analysis tool with ML predictions for optimal pit stops, tire compounds, and race tactics.">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="F1 Strategy Analyzer">
+    <meta property="og:description" content="Professional Formula 1 race strategy analysis with AI predictions">
+    <meta property="og:type" content="website">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <h1>Race Configuration</h1>
+            <p>Configure race parameters for ML-based strategy analysis</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Configuration Panel -->
+            <section class="card config-panel">
+                <form id="strategyForm" aria-label="Strategy Analysis Configuration">
+                    
+                    <!-- Basic Race Parameters -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span aria-hidden="true">🏁</span>
+                            Race Parameters
+                        </h2>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="circuit" class="form-label">
+                                    Circuit <span class="required" aria-label="required">*</span>
+                                </label>
+                                <select id="circuit" name="circuit" class="form-control" required aria-describedby="circuit-help">
+                                    <option value="">Select Circuit</option>
+                                </select>
+                                <small id="circuit-help" class="sr-only">Choose the Formula 1 circuit for analysis</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="team" class="form-label">
+                                    Team <span class="required" aria-label="required">*</span>
+                                </label>
+                                <select id="team" name="team" class="form-control" required aria-describedby="team-help">
+                                    <option value="">Select Team</option>
+                                    <option value="Mercedes">Mercedes-AMG Petronas</option>
+                                    <option value="Red Bull">Oracle Red Bull Racing</option>
+                                    <option value="Ferrari">Scuderia Ferrari</option>
+                                    <option value="McLaren">McLaren F1 Team</option>
+                                    <option value="Alpine">BWT Alpine F1 Team</option>
+                                    <option value="Aston Martin">Aston Martin Aramco</option>
+                                    <option value="Haas">MoneyGram Haas F1</option>
+                                    <option value="AlphaTauri">Scuderia AlphaTauri</option>
+                                    <option value="Alfa Romeo">Alfa Romeo F1 Team</option>
+                                    <option value="Williams">Williams Racing</option>
+                                </select>
+                                <small id="team-help" class="sr-only">Select the F1 team for strategy analysis</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="driver" class="form-label">
+                                    Driver <span class="required" aria-label="required">*</span>
+                                </label>
+                                <select id="driver" name="driver" class="form-control" required aria-describedby="driver-help">
+                                    <option value="">Select Team First</option>
+                                </select>
+                                <small id="driver-help" class="sr-only">Choose the driver after selecting a team</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gridPosition" class="form-label">
+                                    Grid Position <span class="required" aria-label="required">*</span>
+                                </label>
+                                <select id="gridPosition" name="gridPosition" class="form-control" required aria-describedby="grid-help">
+                                    <option value="">Select Position</option>
+                                </select>
+                                <small id="grid-help" class="sr-only">Starting grid position affects strategy recommendations</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weather Conditions -->
+                    <div class="form-section">
+                        <div class="weather-section">
+                            <div class="weather-header" role="button" tabindex="0" aria-expanded="true" aria-controls="weather-controls">
+                                <span class="weather-icon" aria-hidden="true">🌧️</span>
+                                <h3>Weather Forecast</h3>
+                            </div>
+                            
+                            <div id="weather-controls" class="weather-controls">
+                                <div class="rain-probability">
+                                    <label for="rainProbability" class="form-label">
+                                        Rain Probability (%)
+                                    </label>
+                                    <div class="slider-container">
+                                        <input 
+                                            type="range" 
+                                            id="rainProbability" 
+                                            class="slider" 
+                                            min="0" 
+                                            max="100" 
+                                            value="20"
+                                            aria-describedby="rain-value"
+                                        >
+                                    </div>
+                                    <div class="current-value">
+                                        Current: <span id="rainValue" aria-live="polite">20</span>%
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="rainIntensity" class="form-label">Rain Intensity</label>
+                                    <select id="rainIntensity" name="rainIntensity" class="form-control">
+                                        <option value="Light">Light Rain</option>
+                                        <option value="Medium">Medium Rain</option>
+                                        <option value="Heavy">Heavy Rain</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="analyze-btn" id="analyzeBtn" aria-describedby="analyze-help">
+                        <span aria-hidden="true">🏎️</span>
+                        <span>ANALYZE STRATEGY</span>
+                    </button>
+                    <small id="analyze-help" class="sr-only">Click to generate optimal race strategy based on your parameters</small>
+                </form>
+            </section>
+
+            <!-- Loading State -->
+            <section class="loading" id="loading" aria-live="polite" aria-label="Analysis in progress">
+                <div class="spinner" aria-hidden="true"></div>
+                <p>Analyzing optimal strategy...</p>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results" id="results" aria-live="polite" aria-label="Strategy analysis results">
+                <div class="results-header">
+                    <h2>Strategy Analysis Results</h2>
+                    <p>AI-powered recommendations based on historical data and current conditions</p>
+                </div>
+                <div id="resultsContent" role="region" aria-label="Strategy recommendations"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 F1 Strategy Analyzer - Professional Race Analysis Tool</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Configuration and Data
+        const teamDrivers = {
+            'Mercedes': ['HAM', 'RUS'],
+            'Red Bull': ['VER', 'PER'],
+            'Ferrari': ['LEC', 'SAI'],
+            'McLaren': ['NOR', 'PIA'],
+            'Alpine': ['ALO', 'OCO'],
+            'Aston Martin': ['STR', 'ALB'],
+            'Haas': ['MAG', 'HUL'],
+            'AlphaTauri': ['TSU', 'RIC'],
+            'Alfa Romeo': ['BOT', 'ZHO'],
+            'Williams': ['ALB', 'LAT']
+        };
+
+        // Application State
+        const AppState = {
+            isLoading: false,
+            currentAnalysis: null,
+            formData: {}
+        };
+
+        // Utility Functions
+        const Utils = {
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+
+            showElement(element) {
+                element.style.display = 'block';
+                element.setAttribute('aria-hidden', 'false');
+            },
+
+            hideElement(element) {
+                element.style.display = 'none';
+                element.setAttribute('aria-hidden', 'true');
+            },
+
+            announceToScreenReader(message) {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = message;
+                document.body.appendChild(announcement);
+                setTimeout(() => document.body.removeChild(announcement), 1000);
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            form: document.getElementById('strategyForm'),
+            circuitSelect: document.getElementById('circuit'),
+            teamSelect: document.getElementById('team'),
+            driverSelect: document.getElementById('driver'),
+            gridSelect: document.getElementById('gridPosition'),
+            rainSlider: document.getElementById('rainProbability'),
+            rainValue: document.getElementById('rainValue'),
+            rainIntensity: document.getElementById('rainIntensity'),
+            analyzeBtn: document.getElementById('analyzeBtn'),
+            loading: document.getElementById('loading'),
+            results: document.getElementById('results'),
+            resultsContent: document.getElementById('resultsContent')
+        };
+
+        // Event Handlers
+        const EventHandlers = {
+            handleTeamChange() {
+                const team = elements.teamSelect.value;
+                const driverSelect = elements.driverSelect;
+                
+                // Clear previous options
+                driverSelect.innerHTML = '<option value="">Select Driver</option>';
+                
+                if (team && teamDrivers[team]) {
+                    teamDrivers[team].forEach(driver => {
+                        const option = document.createElement('option');
+                        option.value = driver;
+                        option.textContent = driver;
+                        driverSelect.appendChild(option);
+                    });
+                    driverSelect.disabled = false;
+                } else {
+                    driverSelect.disabled = true;
+                }
+                
+                Utils.announceToScreenReader(`${teamDrivers[team]?.length || 0} drivers available for ${team || 'selected team'}`);
+            },
+
+            handleRainSliderChange() {
+                const value = elements.rainSlider.value;
+                elements.rainValue.textContent = value;
+                EventHandlers.updateSliderBackground(elements.rainSlider);
+                
+                // Announce significant changes
+                if (value % 25 === 0) {
+                    Utils.announceToScreenReader(`Rain probability set to ${value}%`);
+                }
+            },
+
+            updateSliderBackground(slider) {
+                const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+                slider.style.background = `linear-gradient(to right, var(--blue) 0%, var(--blue) ${value}%, var(--gray-600) ${value}%, var(--gray-600) 100%)`;
+            },
+
+            async handleFormSubmit(e) {
+                e.preventDefault();
+                
+                if (AppState.isLoading) return;
+                
+                const formData = new FormData(e.target);
+                const data = {
+                    circuit: formData.get('circuit'),
+                    team: formData.get('team'),
+                    driver: formData.get('driver'),
+                    grid_position: formData.get('gridPosition'),
+                    rain_probability: elements.rainSlider.value,
+                    rain_intensity: formData.get('rainIntensity')
+                };
+
+                // Validation
+                if (!data.circuit || !data.team || !data.driver || !data.grid_position) {
+                    Utils.announceToScreenReader('Please fill in all required fields');
+                    return;
+                }
+
+                AppState.formData = data;
+                await API.analyzeStrategy(data);
+            }
+        };
+
+        // API Functions
+        const API = {
+            async loadCircuits() {
+                try {
+                    const response = await fetch('/api/circuits');
+                    const data = await response.json();
+                    
+                    data.circuits.forEach(circuit => {
+                        const option = document.createElement('option');
+                        option.value = circuit;
+                        option.textContent = circuit;
+                        elements.circuitSelect.appendChild(option);
+                    });
+                    
+                    Utils.announceToScreenReader(`${data.circuits.length} circuits loaded`);
+                } catch (error) {
+                    console.error('Error loading circuits:', error);
+                    Utils.announceToScreenReader('Error loading circuits. Please refresh the page.');
+                }
+            },
+
+            async analyzeStrategy(data) {
+                UI.showLoading();
+                
+                try {
+                    const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        AppState.currentAnalysis = result;
+                        UI.showResults(result);
+                        Utils.announceToScreenReader('Strategy analysis completed successfully');
+                    } else {
+                        UI.showError(result.error || 'Analysis failed');
+                        Utils.announceToScreenReader('Strategy analysis failed');
+                    }
+                } catch (error) {
+                    UI.showError('Network error: ' + error.message);
+                    Utils.announceToScreenReader('Network error occurred during analysis');
+                } finally {
+                    UI.hideLoading();
+                }
+            }
+        };
+
+        // UI Functions
+        const UI = {
+            showLoading() {
+                AppState.isLoading = true;
+                Utils.showElement(elements.loading);
+                Utils.hideElement(elements.results);
+                elements.analyzeBtn.disabled = true;
+                elements.analyzeBtn.setAttribute('aria-busy', 'true');
+                Utils.announceToScreenReader('Analyzing strategy, please wait...');
+            },
+
+            hideLoading() {
+                AppState.isLoading = false;
+                Utils.hideElement(elements.loading);
+                elements.analyzeBtn.disabled = false;
+                elements.analyzeBtn.setAttribute('aria-busy', 'false');
+            },
+
+            showResults(data) {
+                elements.resultsContent.innerHTML = `
+                    <div class="strategy-grid">
+                        ${UI.createOptimalStrategyCard(data)}
+                        ${UI.createPredictionsCard(data)}
+                        ${UI.createCircuitAnalysisCard(data)}
+                        ${UI.createWeatherImpactCard(data)}
+                        ${UI.createGridPositionCard(data)}
+                        ${UI.createHistoricalInsightsCard(data)}
+                    </div>
+                `;
+                
+                Utils.showElement(elements.results);
+                elements.results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            },
+
+            createOptimalStrategyCard(data) {
+                return `
+                    <div class="strategy-card" role="article" aria-labelledby="optimal-strategy-title">
+                        <h3 id="optimal-strategy-title">
+                            <span aria-hidden="true">🏆</span>
+                            Optimal Strategy
+                        </h3>
+                        <div class="compound-sequence" role="list" aria-label="Recommended tire compounds">
+                            ${data.strategy.primary_strategy.compounds.map(compound => 
+                                `<span class="compound ${compound.toLowerCase()}" role="listitem" aria-label="${compound} tire compound">${compound}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Strategy Type</span>
+                            <span class="metric-value">${data.strategy.primary_strategy.type}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Risk Level</span>
+                            <span class="risk-indicator risk-${data.strategy.primary_strategy.risk_level.toLowerCase()}" aria-label="${data.strategy.primary_strategy.risk_level} risk level">${data.strategy.primary_strategy.risk_level}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Pit Windows</span>
+                            <span class="metric-value">Laps ${data.strategy.primary_strategy.pit_windows.join(', ')}</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            createPredictionsCard(data) {
+                return `
+                    <div class="strategy-card" role="article" aria-labelledby="predictions-title">
+                        <h3 id="predictions-title">
+                            <span aria-hidden="true">📊</span>
+                            ML Predictions
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Optimal Stint Length</span>
+                            <span class="metric-value">${data.predictions.optimal_stint_length} laps</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Recommended Pit Stops</span>
+                            <span class="metric-value">${data.predictions.optimal_pitstops}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Confidence Level</span>
+                            <span class="metric-value">${data.confidence.stint_prediction}</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            createCircuitAnalysisCard(data) {
+                return `
+                    <div class="strategy-card" role="article" aria-labelledby="circuit-title">
+                        <h3 id="circuit-title">
+                            <span aria-hidden="true">🏁</span>
+                            Circuit Analysis
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Circuit</span>
+                            <span class="metric-value">${data.circuit_info.name}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Track Length</span>
+                            <span class="metric-value">${data.circuit_info.length} km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Abrasion Level</span>
+                            <span class="metric-value">${data.circuit_info.abrasion_level}/5</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Tyre Stress</span>
+                            <span class="metric-value">${data.circuit_info.tyre_stress}/5</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            createWeatherImpactCard(data) {
+                return `
+                    <div class="strategy-card" role="article" aria-labelledby="weather-title">
+                        <h3 id="weather-title">
+                            <span aria-hidden="true">🌧️</span>
+                            Weather Impact
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Rain Probability</span>
+                            <span class="metric-value">${data.weather_impact.rain_probability}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Recommended Compound</span>
+                            <span class="compound ${data.weather_impact.recommended_compound.toLowerCase()}" aria-label="${data.weather_impact.recommended_compound} tire compound">${data.weather_impact.recommended_compound}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Strategy Adjustment</span>
+                            <span class="metric-value">${data.weather_impact.strategy_adjustment}</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            createGridPositionCard(data) {
+                return `
+                    <div class="strategy-card" role="article" aria-labelledby="grid-title">
+                        <h3 id="grid-title">
+                            <span aria-hidden="true">📍</span>
+                            Grid Position Impact
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Starting Position</span>
+                            <span class="metric-value">P${data.grid_position_impact.starting_position}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Strategy Recommendation</span>
+                            <span class="metric-value">${data.grid_position_impact.strategy_adjustment}</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            createHistoricalInsightsCard(data) {
+                return `
+                    <div class="strategy-card" role="article" aria-labelledby="historical-title">
+                        <h3 id="historical-title">
+                            <span aria-hidden="true">📈</span>
+                            Historical Insights
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Circuit Average Stint</span>
+                            <span class="metric-value">${data.strategy.historical_insights.circuit_avg_stint} laps</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Most Successful Strategy</span>
+                            <span class="metric-value">${data.strategy.historical_insights.most_successful_strategy}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Preferred Compounds</span>
+                            <div class="compound-sequence" role="list" aria-label="Historically preferred tire compounds">
+                                ${data.strategy.historical_insights.preferred_compounds.map(compound => 
+                                    `<span class="compound ${compound.toLowerCase()}" role="listitem" aria-label="${compound} tire compound">${compound}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            showError(message) {
+                elements.resultsContent.innerHTML = `
+                    <div class="error" role="alert" aria-live="assertive">
+                        <h3>❌ Analysis Error</h3>
+                        <p>${message}</p>
+                    </div>
+                `;
+                
+                Utils.showElement(elements.results);
+                elements.results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        // Initialization
+        function initializeApp() {
+            // Load initial data
+            API.loadCircuits();
+            
+            // Load grid positions
+            for (let i = 1; i <= 20; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `P${i}`;
+                elements.gridSelect.appendChild(option);
+            }
+            
+            // Set up event listeners
+            elements.teamSelect.addEventListener('change', EventHandlers.handleTeamChange);
+            elements.rainSlider.addEventListener('input', Utils.debounce(EventHandlers.handleRainSliderChange, 100));
+            elements.form.addEventListener('submit', EventHandlers.handleFormSubmit);
+            
+            // Initialize slider
+            EventHandlers.updateSliderBackground(elements.rainSlider);
+            
+            // Keyboard navigation for weather section
+            const weatherHeader = document.querySelector('.weather-header');
+            weatherHeader.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    // Toggle weather section if needed
+                }
+            });
+            
+            Utils.announceToScreenReader('F1 Strategy Analyzer loaded successfully');
+        }
+
+        // Start the application when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Service Worker Registration for PWA capabilities
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(registrationError => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
